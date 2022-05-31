@@ -1,0 +1,220 @@
+:doctype: book
+:listing-caption: Listing
+:toc: macro
+:toclevels: 4
+:sectnumlevels: 6
+:numbered:
+:chapter-label:
+:icons: font
+:source-highlighter: rouge
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+toc::[]
+
+= Podman as a Replacement for Docker Desktop
+
+
+== Summary
+
+Many customers are looking at Podman as a replacement for Docker Desktop now that it is pay to use for businesses.  Many
+of those customers are using Docker Compose and want to continue using it.  This article describes set up of Podman's
+daemon connection such that Docker Compose can utilize it. This article will also explore some considerations for
+running Podman in a restrictive corporate environment enforced by firewalls and a proxy infrastructure that also uses
+SSL inspection where they resign the traffic with their corporate (self-signed) certificates in order to inspect all
+outbound requests beyond the private security enclave.
+
+
+== Introduction
+
+This is a shared effort between Christian Polizzi, Red Hat Architect, and myself.  Together we worked out details of
+working with Podman to replace Docker Desktop entirely, integrate Docker and Docker Compose with Podman and enabled
+Podman to function in restrictive corporate environments.
+
+
+== What is Docker Desktop
+
+Docker Desktop distributes their ecosystem of tools to Windows and Mac machines.  Docker desktop also provides a UI as
+well for developers to manage the ecosystem. Windows and Mac do not have native capabilities to run Linux containers.
+(Nowadays, Windows has more native capabilities nowadays with Windows Subsystems for Linux and Windows containers). To
+provide this capability Docker Desktop creates and manages a virtual machine running Linux with the docker daemon API
+exposed to the host (formerly this was accomplished via https://docs.docker.com/machine/[Docker Machine] which has been
+deprecated in factor of Docker Desktop).  Docker Desktop orchestrates the works of the creation of the Docker Machine.
+One can create a Docker Machine directly as well, but it is often difficult to do for many developers. Docker Desktop
+also provides *docker-compose*, the *docker* CLI, and now a distribution of Kubernetes.  The individual components
+deployed with Docker Desktop are open sourced under the Apache 2 license. To the extent of open development is difficult
+to ascertain in some cases. For example, Docker Dektop's GitHub page hasn't had any updates in years.  Docker Desktop
+itself is closed source.
+
+
+== What is Podman
+
+Podman is a drop in replacement for the Docker engine and CLI.  It is  a community project sponsored by Red Hat.  Many
+simply set an alias for *docker* to point to *podman* and never think about Docker again (_doing so however will not
+work in the context of a script when the alias is set externally from the script_).  Podman implements a similar
+architecture as docker to enable Windows and Mac machines run Linux Containers.  To enable this, Podman recently added a
+Podman daemon that exposes an API to allow for remote calls to Podman.  Podman can also create and managed a virtual
+machine running Fedora CoreOS (FCOS) known as the Podman managed machine.
+
+
+== What about Podman Compose?
+
+There is an open source community project called Podman Compose. This is not a Red Hat sponsored project. This project
+was developed before the Podman daemon was created.  As a result, it utilizes the Podman CLI instead of the API.
+*podman-compose* can read and process a Docker Compose file, but does not deploy the resulting containers in the exact
+same way that docker does.  Instead Podman Compose puts every compose service as a container into a single pod ; for the
+most part this is compatible with Docker's approach of individual containers.
+
+
+== Configuring Docker and Docker Compose to Utilize the Podman Machine
+
+You can configure the Docker and Docker Compose to interact with the Podman machine. The API exposed by the Podman
+daemon implements the same API as the Docker daemon.  Docker allows you to configure different contexts to point to
+different remote machines.  To utilize the Podman daemon (machine) with Podman 3.x one must create an SSH tunnel to
+point to the Podman API socket (_this is not necessary on Linux hosts_). To do this simply run a command like the
+following:
+
+[source,bash]
+----
+ssh -vvv -nNT -L ~/podman.sock:/run/user/1000/podman/podman.sock
+----
+
+With podman With Podman 4.x one can simply point to the Podman socket without the extra tunnel.  We will cover this in a
+future article along with more details and usage surrounding Podman 4.x.
+
+To create the Docker context, run a command like the following:
+
+[source,bash]
+----
+docker context create podman \
+    --default-stack-orchestrator swarm \
+    --description podman –docker \
+    host=unix:///Users/shadowman/podman.sock
+----
+
+And then to use the newly created context:
+[source,bash]
+----
+docker use podman
+----
+
+From now on, all *docker* and *docker-compose* commands will utilize the Podman machine for the back end.
+
+
+== Corporate Network Considerations
+
+All corporations internal (private) networks are secured with various firewalls,
+inspection solutions and intrusion detection and prevention solutions.  Almost all of them require all externally bound
+network requests to pass through an internally facing proxy infrastructure (e.g., to access web resources beyond the
+security enclave of the corporate private network).  Many also incorporate into their proxy infrastructures SSL
+inspection which more often than not is implemented by re-signing SSL traffic with the certificate(s) that the
+corporation controls and publishes.  Many times these certificates are typically self-signed and the client machines are
+configured to trust this self signed certification.  In order to allow Podman to access external resources (e.g.,
+external image registries) through such a proxy, one must teach Podman in the managed machine which proxy to use and if
+SSL inspection is in play then we must also ensure that these certificate(s) used to re-sign the SSL traffic are trusted
+as well.
+
+It is entirely possible to configure the Podman managed VM, because this where the configuration needs to happen, how to
+use both a proxy and a proxy that uses SSL inspection.  Normally we we would leveage SystemD drop-in unit files but this
+does not work Podman.  Thus our only recourse in environments that require to route external requests via a proxy must
+be done, unfortunately, globally via SystemD.
+
+=== SystemD Global Approach
+
+[NOTE]
+====
+It should be noted that this approach will affect every single SystemD service.
+====
+
+First, we create the following file *10-default-env.conf*:
+
+[source,ini]
+.10-default-env.conf
+----
+[Manager]
+DefaultEnvironment="HTTP_PROXY=http://proxy.example.com:8080"
+DefaultEnvironment="HTTPS_PROXY=http://proxy.example.com:8080"
+DefaultEnvironment="NO_PROXY=.example.com,localhost,127.0.0.1,0.0.0.0,::1"
+
+DefaultEnvironment="http_proxy=http://proxy.example.com:8080"
+DefaultEnvironment="https_proxy=http://proxy.example.com:8080"
+DefaultEnvironment="no_proxy=.example.com,localhost,127.0.0.1,0.0.0.0,::1"
+----
+
+Next we add this to SystemD:
+[source,bash]
+----
+sudo install -o root -g root -m 0755 -d /etc/systemd/system.conf.d
+sudo install -o root -g root -m 0644 10-default-env.conf /etc/systemd/system.conf.d
+----
+
+If the proxy to be used performs active SSL inspection then the relevant certificates must be provisioned at the system
+level (e.g., globally):
+
+[source,bash]
+----
+sudo install -o root -g root -m 0644 *.crt /etc/pki/ca-trust/source/anchors
+sudo update-ca-trust
+----
+
+Finally we reboot because there is no way to have SystemD reload the default environment:
+
+[source,bash]
+----
+sudo systemctl reboot
+----
+
+=== SystemD Drop-In Approach
+
+As previously mentioned Podman cannot be configured to use a proxy at all via SystemD unit files. Because if it could we
+could add a SystemD drop-in for the Podman service.  It is unfortunate that Podman does not respect this because the
+SystemD drop-in mechanism is rather elegant.  For a moment, let us entertain the thought of: "What if Podman did respect
+SystemD properly?"  If this were the case it is really rather straight forward.
+
+We would first create the drop-in unit file *podman.conf*:
+
+[source,ini]
+.podman.conf
+----
+[Service]
+EnvironmentFile=/etc/proxy.env
+----
+
+We would then add this drop-in to SystemD (the SystemD drop in  ensures that this will affect only the configured
+service and allows us to augment or override the main unit file, without touching the main unit file at all):
+
+[source,bash]
+----
+sudo install -o root -g root -m 0755 -d /etc/systemd/system/podman.service.d
+sudo install -o root -g root -m 0644 podman.conf /etc/systemd/system/podman.service.d
+----
+
+Then we would create the file that defines the environment variables as *proxy.env*:
+
+[source,bash]
+.proxy.env
+----
+HTTP_PROXY=http://proxy.example.com:8080
+HTTPS_PROXY=http://proxy.example.com:8080
+NO_PROXY=.example.com,localhost,127.0.0.1,0.0.0.0,::1
+http_proxy=http://proxy.example.com:8080
+https_proxy=http://proxy.example.com:8080
+no_proxy=.example.com,localhost,127.0.0.1,0.0.0.0,::1
+----
+
+Next we would make this available in the expected location on the file system and restart the Podman service:
+
+[source,bash]
+----
+sudo install -o root -g root -m 0644 proxy.env /etc/proxy.env
+sudo systemctl daemon-reload
+sudo systemctl restart podman.service
+----
+
+Elegant, we know.
