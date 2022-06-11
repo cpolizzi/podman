@@ -23,12 +23,29 @@ toc::[]
 
 == Introduction
 
-*TODO*
+The Podman managed machine is a virtual machine (VM) and is enabled and managed via the Podman command line interface
+(CLI). https://www.qemu.org/[QEMU] is used as the "hypervisor". On non-Linux hosts Podman requires a VM (or another
+remote host) in order to orchestrate containers and container images. The approach that Podman has taken is highly
+similar to that of the Docker Desktop approach which is described briefly described in
+xref:podman-as-a-replacement-for-docker-desktop.adoc[Podman as a Replacement for Docker Desktop] (
+https://source.redhat.com/personal_blogs/wip_podman_as_replacement_for_docker_desktop_docker_compose[
+Red Hat The Source Article: Podman as a Replacement for Docker Desktop]).
 
 
 == Rationale
 
-*TODO*
+By default the Podman managed machine is accessible from the host system, including for remote access via Secure Shell
+(`ssh` and `scp`). There are times when one may need (or wish) to enable similar connectivity from the VM (guest) to the host.
+
+One such example is in restrictive environments such as corporation or government environments that require a proxy to
+access external resources beyond the trusted security enclave but the proxy infrastructure requires authentication. In
+a circumstance such as this it is not an option to store security credentials in a configuration file let alone embed
+them in some in some script. In this case the organization will most likely have an inner source solution (as in: a
+proxy for a proxy).
+
+Another example may simply be that one is testing out a number of things in an immutable system such as Fedora CoreOS
+(FCOS) and simply wants to transfer the result of this work back to the host via Secure Copy (`scp`) from the guest back
+to the host.
 
 
 == How to Enable
@@ -38,7 +55,13 @@ toc::[]
 All approaches have been tested on Podman 3.4.4 and Podman 4.1.0 and on Linux and MacOS.
 ====
 
-The way we enable this is to modify the QEMU command line for the Podman managed machine.
+The way we enable this is to modify the QEMU command line for the Podman managed machine. Before we can do this we must
+first create the Podman managed machine:
+
+[souce,bash]
+----
+podman machine init
+----
 
 Once the Podman VM is created from `podman machine init` and prior to starting it we merely modify the managed machine
 JSON configuration file for the QEMU command line. We add a secondary NIC to the VM by appending the following QEMU
