@@ -43,7 +43,8 @@ outbound requests beyond the private security enclave.
 
 This is a shared effort between Henry Hellbusch, Red Hat Senior Consultant, and myself, Red Hat Architect.  Together we
 worked out details of working with Podman to replace Docker Desktop entirely, integrate Docker and Docker Compose with
-Podman and enabled Podman to function in restrictive corporate environments.
+Podman and enabled Podman to function in restrictive corporate environments. The original article is available on
+https://source.redhat.com/personal_blogs/wip_podman_as_replacement_for_docker_desktop_docker_compose[The Source].
 
 
 == What is Docker Desktop
