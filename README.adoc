@@ -10,7 +10,6 @@
 :toc: left
 :toclevels: 4
 :sectanchors:
-:sectnums:
 :chapter-label:
 :listing-caption: Listing
 :icons: font
@@ -26,7 +25,18 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+toc::[]
+
 = {title}
+
+This is a Series of Podman related articles on how to achieve various things that are not clear and sometimes not trivial.
+
+== Summary
+It also addresses using Podman in restrictive environments. Examples of such are private security enclaves such as corporations
+and government. These environments always require at least a proxy to access Internet resources beyond the private
+security enclave. Many times, but not all, the internally facing proxy requires HTTPS with privately issued certificate
+authority certificates (sometimes this is to enable SSL / TLS inspection for externally accessed resources. All of these
+impact the success rate of utilizing Podman in restrictive environments.
 
 . xref:podman-as-a-replacement-for-docker-desktop.adoc[Podman as a Replacement for Docker Desktop]
 . xref:orchestrating-podman-vm-to-host-communication.adoc[Orchestrating Podman VM to Host Communication]
