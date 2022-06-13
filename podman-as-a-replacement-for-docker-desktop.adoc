@@ -2,8 +2,7 @@
 =======
 :doctype: article
 :title: Podman as a Replacement for Docker Desktop
-:author: Christian J. Polizzi
-:email: christian.polizzi@redhat.com
+:author: Christian J. Polizzi <christian.polizzi@redhat.com>, Henry Hellbusch <hhellbus@redhat.com>
 :last-update-label: Last updated: 
 :version-label: Revision
 :revnumber: 1.0
@@ -42,9 +41,9 @@ outbound requests beyond the private security enclave.
 
 == Introduction
 
-This is a shared effort between Christian Polizzi, Red Hat Architect, and myself.  Together we worked out details of
-working with Podman to replace Docker Desktop entirely, integrate Docker and Docker Compose with Podman and enabled
-Podman to function in restrictive corporate environments.
+This is a shared effort between Henry Hellbusch, Red Hat Senior Consultant, and myself, Red Hat Architect.  Together we
+worked out details of working with Podman to replace Docker Desktop entirely, integrate Docker and Docker Compose with
+Podman and enabled Podman to function in restrictive corporate environments.
 
 
 == What is Docker Desktop
