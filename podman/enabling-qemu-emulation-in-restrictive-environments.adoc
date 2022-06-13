@@ -1,0 +1,43 @@
+{title}
+=======
+:doctype: article
+:title: Enabling QEMU Emulation in Restrictive Environments
+:author: Christian J. Polizzi
+:email: christian.polizzi@redhat.com
+:last-update-label: Last updated: 
+:version-label: Revision
+:revnumber: 1.0
+:docinfo: shared
+:data-uri:
+:toc: left
+:toclevels: 4
+:sectanchors:
+:sectnums:
+:chapter-label:
+:listing-caption: Listing
+:icons: font
+:source-highlighter: rouge
+:stylesheet: style.css
+:stylesdir: styles
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+toc::[]
+
+== References
+
+* https://github.com/containers/podman/issues/12144
+* https://github.com/coreos/fedora-coreos-tracker/issues/379
+* https://github.com/multiarch/qemu-user-static
+* http://www.rpmfind.info/linux/rpm2html/search_php?query=qemu-user-static
+* https://flatcar-linux.org/docs/latest/setup/systemd/drop-in-units/
+* https://steveazz.xyz/micro/systemd-drop-in/
+* https://stackoverflow.com/questions/59842743/
+* https://freedesktop.org/software/systemd/man/systemd-system.conf.html
+* https://csportal.menlosecurity.com/hc/en-us/articles/215221528-Menlo-Security-Production-SSL-Inspection-Root-CA-Certificate
