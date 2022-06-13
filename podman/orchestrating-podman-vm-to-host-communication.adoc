@@ -1,12 +1,24 @@
-:doctype: book
-:listing-caption: Listing
-:toc: macro
+{title}
+=======
+:doctype: article
+:title: Orchestrating Podman VM to Host Communication
+:author: Christian J. Polizzi
+:email: christian.polizzi@redhat.com
+:last-update-label: Last updated: 
+:version-label: Revision
+:revnumber: 1.0
+:docinfo: shared
+:data-uri:
+:toc: left
 :toclevels: 4
-:sectnumlevels: 6
-:numbered:
+:sectanchors:
+:sectnums:
 :chapter-label:
+:listing-caption: Listing
 :icons: font
 :source-highlighter: rouge
+:stylesheet: style.css
+:stylesdir: styles
 
 ifdef::env-github[]
 :tip-caption: :bulb:
@@ -17,9 +29,6 @@ ifdef::env-github[]
 endif::[]
 
 toc::[]
-
-= Orchestrating Podman VM to Host Communication
-
 
 == Introduction
 

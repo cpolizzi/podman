@@ -1,4 +1,32 @@
-= Podman Series
+:doctype: book
+:title: Podman Series
+:author: Christian J. Polizzi
+:email: christian.polizzi@redhat.com
+:last-update-label: Last updated: 
+:version-label: Revision
+:revnumber: 1.0
+:docinfo: shared
+:data-uri:
+:toc: left
+:toclevels: 4
+:sectanchors:
+:sectnums:
+:chapter-label:
+:listing-caption: Listing
+:icons: font
+:source-highlighter: rouge
+:stylesheet: style.css
+:stylesdir: styles
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+= {title}
 
 . xref:podman-as-a-replacement-for-docker-desktop.adoc[Podman as a Replacement for Docker Desktop]
 . xref:orchestrating-podman-vm-to-host-communication.adoc[Orchestrating Podman VM to Host Communication]

@@ -1,0 +1,31 @@
+@import url(styles/themes/css/fedora.css);
+
+pre code {
+	background-color: #eeeeee !important;
+	padding: 1em;
+	word-wrap: break-word;
+	white-space: pre-wrap;
+    border: 1px dotted black;
+    border-left: 3px solid #336699;
+}
+
+/*
+#author {
+    background-color: #ee332a;
+    color: white;
+}
+
+#email * {
+    background-color: #ee332a;
+    color: white;
+}
+*/
+
+#toc a:hover {
+    background-color: white;
+}
+
+#toctitle {
+    background-color: #3c6eb4;
+    color: white;
+}

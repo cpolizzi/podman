@@ -1,0 +1,3 @@
+[submodule "podman/styles/themes"]
+	path = podman/styles/themes
+	url = https://github.com/darshandsoni/asciidoctor-skins.git
