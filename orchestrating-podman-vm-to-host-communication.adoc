@@ -47,14 +47,19 @@ By default the Podman managed machine is accessible from the host system, includ
 (`ssh` and `scp`). There are times when one may need (or wish) to enable similar connectivity from the VM (guest) to the host.
 
 One such example is in restrictive environments such as corporation or government environments that require a proxy to
-access external resources beyond the trusted security enclave but the proxy infrastructure requires authentication. In
-a circumstance such as this it is not an option to store security credentials in a configuration file let alone embed
-them in some in some script. In this case the organization will most likely have an inner source solution (as in: a
-proxy for a proxy).
+access external resources beyond the trusted security enclave. In some environments the proxy infrastructure requires
+authentication. In a circumstance such as this it is not an option to store security credentials in a configuration file
+let alone embed them in some in some script. In this case the organization _may_ have an inner source solution (e.g.; a
+proxy for a proxy) to handle the case of CLI (Command Line Interface) tools that are not authenticating proxy aware.
 
 Another example may simply be that one is testing out a number of things in an immutable system such as Fedora CoreOS
 (FCOS) and simply wants to transfer the result of this work back to the host via Secure Copy (`scp`) from the guest back
 to the host.
+[NOTE]
+====
+Of course with host to guest SSH and this `scp` connectivity fully enabled "out of the box" with Podman transferring files out of
+the managed machine is possible without this.
+====
 
 
 == How to Enable
