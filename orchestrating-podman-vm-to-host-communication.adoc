@@ -44,7 +44,8 @@ Red Hat The Source Article: Podman as a Replacement for Docker Desktop]).
 == Rationale
 
 By default the Podman managed machine is accessible from the host system, including for remote access via Secure Shell
-(`ssh` and `scp`). There are times when one may need (or wish) to enable similar connectivity from the VM (guest) to the host.
+and Secure Copy (`ssh` and `scp` respectively). There are times when one may need (or wish) to enable similar
+connectivity from the VM (guest) to the host.
 
 One such example is in restrictive environments such as corporation or government environments that require a proxy to
 access external resources beyond the trusted security enclave. In some environments the proxy infrastructure requires
@@ -72,7 +73,7 @@ All approaches have been tested on Podman 3.4.4 and Podman 4.1.0 and on Linux an
 The way we enable this is to modify the QEMU command line for the Podman managed machine. Before we can do this we must
 first create the Podman managed machine:
 
-[souce,bash]
+[source,bash]
 ----
 podman machine init
 ----
@@ -167,7 +168,7 @@ EOM
 Here we bind *netcat* on port `8080` to all available host network interfaces, wait for a connection, provide a response
 back from an inline heredoc that also includes the FQDN of the host and then terminates the connection.
 
-And from the Podman machine we will connect to port 8080 on the host:
+And from the Podman machine we will connect to port `8080` on the host:
 
 [source,bash]
 ----
