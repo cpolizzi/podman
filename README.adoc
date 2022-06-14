@@ -2,6 +2,7 @@
 :title: Podman Series
 :author: Christian J. Polizzi
 :email: christian.polizzi@redhat.com
+:nofooter:
 :last-update-label: Last updated: 
 :version-label: Revision
 :revnumber: 1.0
