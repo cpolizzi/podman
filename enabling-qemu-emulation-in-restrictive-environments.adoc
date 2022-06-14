@@ -1,6 +1,6 @@
 {title}
 =======
-:doctype: article
+:doctype: docbook
 :title: Enabling QEMU Emulation in Restrictive Environments
 :author: Christian J. Polizzi
 :email: christian.polizzi@redhat.com
