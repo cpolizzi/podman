@@ -290,7 +290,7 @@ Content-Length: 1509
 
 We have shown how to enable Podman managed machine (virtual machine, VM) connectivity to the host itself with minimal
 effort. This approach can easily be extended to enabling integration from the guest to the host. There exists
-restrictive environments such that access to external Internet resources are consstrained by using authenticating proxy
+restrictive environments such that access to external Internet resources are constrained by using authenticating proxy
 servers must be used on the internal security enclave and that one desires to orchestrate a proxy for proxy. This is
 merely only one singular use case.
 
