@@ -1,0 +1,94 @@
+{
+ "ConfigPath": {
+  "Path": "/Users/cpolizzi/.config/containers/podman/machine/qemu/podman-machine-default.json"
+ },
+ "CmdLine": [
+  "/opt/homebrew/bin/qemu-system-aarch64",
+  "-m",
+  "6144",
+  "-smp",
+  "4",
+  "-fw_cfg",
+  "name=opt/com.coreos/config,file=/Users/cpolizzi/.config/containers/podman/machine/qemu/podman-machine-default.ign",
+  "-qmp",
+  "unix://var/folders/77/qk6_53m11yb7t885qf6d32jw0000gn/T/podman/qmp_podman-machine-default.sock,server=on,wait=off",
+  "-netdev",
+  "socket,id=vlan,fd=3",
+  "-device",
+  "virtio-net-pci,netdev=vlan,mac=5a:94:ef:e4:0c:ee",
+  "-device",
+  "virtio-serial",
+  "-chardev",
+  "socket,path=/var/folders/77/qk6_53m11yb7t885qf6d32jw0000gn/T/podman/podman-machine-default_ready.sock,server=on,wait=off,id=podman-machine-default_ready",
+  "-device",
+  "virtserialport,chardev=podman-machine-default_ready,name=org.fedoraproject.port.0",
+  "-accel",
+  "hvf",
+  "-accel",
+  "tcg",
+  "-cpu",
+  "host",
+  "-M",
+  "virt",
+  "-serial",
+  "chardev:s0",
+  "-chardev",
+  "stdio,id=s0,mux=on,logfile=qemu-s0.log,signal=off",
+  "-D",
+  "qemu-debug.log",
+  "-d",
+  "cpu_reset,int,guest_errors,mmu,unimp,plugin,strace,page",
+  "-monitor",
+  "unix:qemu-monitor.sock,server,nowait",
+  "-S",
+  "-drive",
+  "file=/opt/homebrew/share/qemu/edk2-aarch64-code.fd,if=pflash,format=raw,readonly=on",
+  "-drive",
+  "file=/Users/cpolizzi/.local/share/containers/podman/machine/qemu/podman-machine-default_ovmf_vars.fd,if=pflash,format=raw",
+  "-virtfs",
+  "local,path=/Users/cpolizzi,mount_tag=vol0,security_model=mapped-xattr",
+  "-drive",
+  "if=virtio,file=/Users/cpolizzi/.local/share/containers/podman/machine/qemu/podman-machine-default_fedora-coreos-36.20220511.dev.0-qemu.aarch64.qcow2"
+ ],
+ "Rootful": false,
+ "UID": 501,
+ "IgnitionFilePath": {
+  "Path": "/Users/cpolizzi/.config/containers/podman/machine/qemu/podman-machine-default.ign"
+ },
+ "ImageStream": "stable",
+ "ImagePath": {
+  "Path": "/Users/cpolizzi/.local/share/containers/podman/machine/qemu/podman-machine-default_fedora-coreos-36.20220511.dev.0-qemu.aarch64.qcow2"
+ },
+ "Mounts": [
+  {
+   "ReadOnly": false,
+   "Source": "/Users/cpolizzi",
+   "Tag": "vol0",
+   "Target": "/Users/cpolizzi",
+   "Type": "9p"
+  }
+ ],
+ "Name": "podman-machine-default",
+ "PidFilePath": {
+  "Path": "/var/folders/77/qk6_53m11yb7t885qf6d32jw0000gn/T/podman/podman-machine-default.pid"
+ },
+ "QMPMonitor": {
+  "Address": {
+   "Path": "/var/folders/77/qk6_53m11yb7t885qf6d32jw0000gn/T/podman/qmp_podman-machine-default.sock"
+  },
+  "Network": "unix",
+  "Timeout": 2000000000
+ },
+ "ReadySocket": {
+  "Path": "/var/folders/77/qk6_53m11yb7t885qf6d32jw0000gn/T/podman/podman-machine-default_ready.sock"
+ },
+ "CPUs": 4,
+ "DiskSize": 40,
+ "Memory": 6144,
+ "IdentityPath": "/Users/cpolizzi/.ssh/podman-machine-default",
+ "Port": 51644,
+ "RemoteUsername": "core",
+ "Starting": true,
+ "Created": "2022-06-14T19:49:35.598042-05:00",
+ "LastUp": "2022-06-14T23:30:05.580924-05:00"
+}

@@ -1,0 +1,298 @@
+{title}
+=======
+:doctype: article
+:title: Enabling QEMU CLI Monitoring and Logging
+:author: Christian J. Polizzi
+:email: christian.polizzi@redhat.com
+:last-update-label: Last updated: 
+:version-label: Revision
+:revnumber: 1.0
+:docinfo: shared
+:data-uri:
+:toc: left
+:toclevels: 4
+:sectanchors:
+:sectnums:
+:chapter-label:
+:listing-caption: Listing
+:icons: font
+:source-highlighter: rouge
+:stylesheet: style.css
+:stylesdir: styles
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+toc::[]
+
+QEMU can redirect a guest VM's console output to a log file on the host from the moment the guest VM operating system
+starts to emit output to its console device. QEMU also has a monitor service that can be used to interact with the guest
+VM directly. The monitor service allows us to not only interrogate the VM but also to control it and create and restore
+snapshots and many more things. In this article we show how to enable and use these capabilities. Additionally we
+illustrate how to enable QEMU level debugging and immediately suspend the VM immediately after it is started.
+
+
+== Rationale
+
+When QEMU was upgraded to v7.0.0 for the use of Podman on macOS on the new Apple silicon (M1) some users reported
+that their host MacBook crashed immediately after starting th Podman managed machine (VM). But not everyone on the M1
+Mac's had this issue.
+
+When the Podman machine was sized to not more than 3GB for memory there were not any issues. But when the memory size
+was changed to more than this then the Podman machine would not start. The Podman project implemented a change to
+correct this due to the following recommendation
+https://github.com/containers/podman/issues/14303#issuecomment-1152047754[ Cannot start machine with podman version
+4.1.0 in M1 Mac #14303] and fixed by https://github.com/containers/podman/pull/14563[ Fix M1 QEMU flags #14563] but then
+only certain types of M1 Mac's started crashing. This behavior occurred not only on Podman 4.1.0 but also on 3.4.4.
+
+The reports of host crashes were not always consistent across the macOS version and specific hardware. For example The
+M1 Mac Mini and M1 MacBook Pro never seemed to have an issue with regards to the host crashing. However the M1 MacBook
+Pro Max consistently crashed.
+
+With this in mind it became necessary to acquire as much information as possible before the host actually crashed.
+
+[NOTE]
+====
+It turned out that upgrading M1 MacBook Pro (Max or not) to macOS 12.4 resolved the host crashes and with the Podman
+fix.
+====
+
+
+== How to Enable
+
+We enable all of these things by adding the following to the QEMU command line when starting up the guest:
+
+[source,text]
+----
+  -serial chardev:s0                                             # <1>
+  -chardev stdio,id=s0,mux=on,logfile=qemu-s0.log,signal=off     # <2>
+  -D qemu-debug.log                                              # <3>
+  -d cpu_reset,int,guest_errors,mmu,unimp,plugin,strace,page     # <4>
+  -monitor unix:qemu-monitor.sock,server,nowait                  # <5>
+  -S                                                             # <6>
+----
+<1> Redirects the serial port to the character device `s0`
+<2> Connects to the standard I/O character device `s0` and directs it to the log file `qemu-s0.log`
+<3> Directs all QEMU debug output to `qemu-debug.log`
+<4> QEMU debug output to enable
+<5> Redirects the QEMU monitor to the Unix socket `qemu-monitor.sock` enabling console interaction and inspection of the VM
+<6> Immediately suspends the VM upon start
+
+[NOTE]
+====
+Try using `-chardev file,id=s0,path=qemu-s0.log`
+====
+
+== Interacting with the QEMU VM
+
+First and foremost we require a tool called `socat` which is a multipurpose relay tool (*SO*cket *CAT*). To install:
+
+Install `socat`:
+[source,bash]
+.MacOS
+----
+brew install socat
+----
+
+[source,bash]
+.Ubuntu
+----
+apt install -y socat
+----
+
+[source,bash]
+.Fedora / RHEL
+----
+dnf install -y socat
+----
+
+[NOTE]
+====
+`socat` is already installed on Fedora CoreOS
+====
+
+=== Connecting to the QEMU Monitor
+
+Then connect once the guest is started:
+[source,bash]
+----
+socat -,echo=0,icanon=0 unix-connect:qemu-monitor.sock
+----
+
+And we will be immediately presented with:
+[source,text]
+----
+QEMU 7.0.0 monitor - type 'help' for more information
+(qemu)
+----
+
+=== Fundamental QEMU Monitor Commands
+
+[TIP]
+====
+The QEMU monitor CLI is tab completion enabled.
+====
+
+[source,text]
+.Resume the VM
+----
+(qemu) c     # <1>
+----
+<1> `cont` can alternatively be used
+
+[source,text]
+.Suspend the VM
+----
+(qemu) s     # <1>
+----
+<1> `stop` can alternatively be used
+
+[source,text]
+.Quit the Monitor
+----
+(qemu) CTRL+C     # <1>
+----
+<1> Quits the monitor without terminating the VM, note that this is a keyboard sequence and not a command
+
+[source,text]
+.Terminate the VM and Quit the Monitor
+----
+(qemu) q     # <1>
+----
+<1> `quit` can alternatively be used
+
+=== Useful VM Information Interrogation
+
+[source,text]
+.Show Block Devices
+----
+(qemu) info block
+pflash0 (#block169): /opt/homebrew/share/qemu/edk2-aarch64-code.fd (raw, read-only)
+    Attached to:      /machine/virt.flash0
+    Cache mode:       writeback
+
+pflash1 (#block380): /Users/cpolizzi/.local/share/containers/podman/machine/qemu/podman-machine-default_ovmf_vars.fd (raw)
+    Attached to:      /machine/virt.flash1
+    Cache mode:       writeback
+
+virtio0 (#block523): /Users/cpolizzi/.local/share/containers/podman/machine/qemu/podman-machine-default_fedora-coreos-36.20220511.dev.0-qemu.aarch64.qcow2 (qcow2)
+    Attached to:      /machine/peripheral-anon/device[4]/virtio-backend
+    Cache mode:       writeback
+
+floppy0: [not inserted]
+    Removable device: not locked, tray closed
+
+sd0: [not inserted]
+    Removable device: not locked, tray closed
+----
+
+[source,text]
+.Show Block Device Statistics
+----
+(qemu) info blockstats 
+pflash0: rd_bytes=0 wr_bytes=0 rd_operations=0 wr_operations=0 flush_operations=0 wr_total_time_ns=0 rd_total_time_ns=0 flush_total_time_ns=0 rd_merged=0 wr_merged=0 idle_time_ns=0
+pflash1: rd_bytes=0 wr_bytes=0 rd_operations=0 wr_operations=0 flush_operations=0 wr_total_time_ns=0 rd_total_time_ns=0 flush_total_time_ns=0 rd_merged=0 wr_merged=0 idle_time_ns=0
+virtio0: rd_bytes=275011584 wr_bytes=18518016 rd_operations=9351 wr_operations=1255 flush_operations=181 wr_total_time_ns=273603000 rd_total_time_ns=261581000 flush_total_time_ns=49973000 rd_merged=61 wr_merged=4 idle_time_ns=213930526000
+floppy0: rd_bytes=0 wr_bytes=0 rd_operations=0 wr_operations=0 flush_operations=0 wr_total_time_ns=0 rd_total_time_ns=0 flush_total_time_ns=0 rd_merged=0 wr_merged=0 idle_time_ns=0
+sd0: rd_bytes=0 wr_bytes=0 rd_operations=0 wr_operations=0 flush_operations=0 wr_total_time_ns=0 rd_total_time_ns=0 flush_total_time_ns=0 rd_merged=0 wr_merged=0 idle_time_ns=0
+----
+
+[source,text]
+.Show Character Devices
+----
+(qemu) info chardev
+parallel0: filename=vc
+compat_monitor1: filename=unix:qemu-monitor.sock,server=on
+s0: filename=mux
+podman-machine-default_ready: filename=unix:/var/folders/77/qk6_53m11yb7t885qf6d32jw0000gn/T/podman/podman-machine-default_ready.sock,server=on
+compat_monitor0: filename=disconnected:unix://var/folders/77/qk6_53m11yb7t885qf6d32jw0000gn/T/podman/qmp_podman-machine-default.sock,server=on
+s0-base: filename=stdio
+
+----
+
+[source,text]
+.Show Network State
+----
+(qemu) info network
+virtio-net-pci.0: index=0,type=nic,model=virtio-net-pci,macaddr=5a:94:ef:e4:0c:ee
+ \ vlan: index=0,type=socket,socket: fd=3
+----
+
+[source,text]
+.Show PCI Devices
+----
+(qemu) info pci
+  Bus  0, device   0, function 0:
+    Host bridge: PCI device 1b36:0008
+      PCI subsystem 1af4:1100
+      id ""
+  Bus  0, device   1, function 0:
+    Ethernet controller: PCI device 1af4:1000
+      PCI subsystem 1af4:0001
+      IRQ 255, pin A
+      BAR0: I/O at 0x10c0 [0x10df].
+      BAR1: 32 bit memory at 0x10050000 [0x10050fff].
+      BAR4: 64 bit prefetchable memory at 0x10040000 [0x10043fff].
+      BAR6: 32 bit memory at 0xffffffffffffffff [0x0003fffe].
+      id ""
+  Bus  0, device   2, function 0:
+    Class 1920: PCI device 1af4:1003
+      PCI subsystem 1af4:0003
+      IRQ 255, pin A
+      BAR0: I/O at 0x1080 [0x10bf].
+      BAR1: 32 bit memory at 0x10051000 [0x10051fff].
+      BAR4: 64 bit prefetchable memory at 0x10044000 [0x10047fff].
+      id ""
+  Bus  0, device   3, function 0:
+    Class 0002: PCI device 1af4:1009
+      PCI subsystem 1af4:0009
+      IRQ 255, pin A
+      BAR0: I/O at 0x10e0 [0x10ff].
+      BAR1: 32 bit memory at 0x10052000 [0x10052fff].
+      BAR4: 64 bit prefetchable memory at 0x10048000 [0x1004bfff].
+      id ""
+  Bus  0, device   4, function 0:
+    SCSI controller: PCI device 1af4:1001
+      PCI subsystem 1af4:0002
+      IRQ 255, pin A
+      BAR0: I/O at 0x1000 [0x107f].
+      BAR1: 32 bit memory at 0x10053000 [0x10053fff].
+      BAR4: 64 bit prefetchable memory at 0x1004c000 [0x1004ffff].
+      id ""
+----
+
+
+== Fedora CoreOS Guest VM Console Log
+
+For those that are curious what do we see when we enable logging of the QEMU guest console output to a log file? This is
+the console output of Fedora CoreOS from the moment that it started to boot in the guest.
+
+[source]
+----
+include::resources/qemu-s0.log[]
+----
+
+
+== References
+
+* https://www.qemu.org/docs/master/system/qemu-manpage.html[
+QEMU User Documentation]
+* https://unix.stackexchange.com/questions/479085/can-qemu-m-virt-on-arm-aarch64-have-multiple-serial-ttys-like-such-as-pl011-t[
+Can QEMU -M virt on arm / aarch64 have multiple serial TTYs like such as PL011 ttyAMA0 and ttyAMA1?]
+* https://unix.stackexchange.com/questions/426652/connect-to-running-qemu-instance-with-qemu-monitor[
+Connect to running qemu instance with qemu monitor]
+* https://wiki.osdev.org/QEMU#Useful_QEMU_command-line_options[
+Useful QEMU command-line options]
+* https://en.wikibooks.org/wiki/QEMU/Monitor[
+QEMU Monitor Commands]
+* https://gist.github.com/citruz/9896cd6fb63288ac95f81716756cb9aa[
+Running Linux and Windows on M1 with QEMU]
+* https://www.emaculation.com/forum/viewtopic.php?t=11408[
+The UTM Thread]
+* https://blogs.blackberry.com/en/2021/05/strong-arming-with-macos-adventures-in-cross-platform-emulation[
+Strong ARMing with MacOS: Adventures in Cross-Platform Emulation]
