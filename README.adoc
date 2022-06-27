@@ -44,5 +44,5 @@ impact the success rate of utilizing Podman in restrictive environments.
 
 . xref:podman-as-a-replacement-for-docker-desktop.adoc[Podman as a Replacement for Docker Desktop]
 . xref:orchestrating-podman-vm-to-host-communication.adoc[Orchestrating Podman VM to Host Communication]
-. xref:enabling-qemu-emulation-in-restrictive-environments.adoc[Enabling QEMU Emulation in Restrictive Environments]
 . xref:enabling-qemu-cli-monitoring-and-logging.adoc[Enabling QEMU CLI Monitoring and Logging]
+. xref:enabling-qemu-emulation-in-restrictive-environments.adoc[Enabling QEMU Emulation in Restrictive Environments]

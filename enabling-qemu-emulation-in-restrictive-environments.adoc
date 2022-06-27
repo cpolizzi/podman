@@ -6,7 +6,7 @@
 :email: christian.polizzi@redhat.com
 :last-update-label: Last updated: 
 :version-label: Revision
-:revnumber: 1.0
+:revnumber: WIP
 :docinfo: shared
 :data-uri:
 :toc: left
@@ -29,6 +29,11 @@ ifdef::env-github[]
 endif::[]
 
 toc::[]
+
+[NOTE]
+====
+This is a work in progress.
+====
 
 == References
 
