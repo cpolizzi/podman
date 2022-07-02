@@ -1,0 +1,108 @@
+{title}
+=======
+:doctype: article
+:title: Starting Podman Continers at System Boot
+:author: Christian J. Polizzi
+:email: christian.polizzi@redhat.com
+:last-update-label: Last updated: 
+:version-label: Revision
+:revnumber: WIP
+:docinfo: shared
+:data-uri:
+:toc: left
+:toclevels: 4
+:sectanchors:
+:sectnums:
+:chapter-label:
+:listing-caption: Listing
+:icons: font
+:source-highlighter: rouge
+:stylesheet: style.css
+:stylesdir: styles
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+toc::[]
+
+[NOTE]
+====
+This is a work in progress.
+====
+
+Remember, by default, Podman runs containers root-less. This is a good thing. This means that when we want to start a
+container on system boot via SystemD then we need to conform to this. The way to do this is via SystemD user level unit
+files.
+
+
+== How to Enable
+
+First create the container manually:
+[source,bash]
+----
+podman run -d \
+  --name=unifi-controller \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e MEM_LIMIT=1024 `#optional` \
+  -e MEM_STARTUP=1024 `#optional` \
+  -p 8443:8443 \
+  -p 3478:3478/udp \
+  -p 10001:10001/udp \
+  -p 8080:8080 \
+  -p 1900:1900/udp `#optional` \
+  -p 8843:8843 `#optional` \
+  -p 8880:8880 `#optional` \
+  -p 6789:6789 `#optional` \
+  -p 5514:5514/udp `#optional` \
+  -v unifi-config:/config \
+  --restart unless-stopped \
+  lscr.io/linuxserver/unifi-controller
+----
+
+
+[source,bash]
+----
+podman generate systemd --name unifi-controller --files --container-prefix podman
+sudo install -o root -g root -m 0644 podman-unifi-controller.service /etc/systemd/user/
+loginctl enable-linger core
+systemctl --user daemon-reload
+systemctl --user enable podman-unifi-controller.service
+systemctl --user start podman-unifi-controller.service
+systemctl --user status podman-unifi-controller.service
+podman ps
+----
+
+
+The real proof is when you reboot the host:
+[source,bash]
+----
+sudo systemctl reboot
+podman ps
+----
+
+
+Once it reboots we should be able to connect to our user level rootless container.
+
+
+== References
+
+* https://www.tutorialworks.com/podman-systemd/[
+How to Start a Container on Boot with Podman and Systemd]
+* https://access.redhat.com/discussions/5733161[
+Red Hat Solutions - How to Auto-starting rootless pods using systemd]
+* https://github.com/containers/podman/blob/main/docs/source/markdown/podman-generate-systemd.1.md#installation-of-generated-systemd-unit-files[
+Installation of generated systemd unit files]
+* https://github.com/containers/podman/issues/8504[
+Rootless container doesn't start at systemstart: Error: no container with name or ID <container ID>
+found: no such container #8504]
+* https://github.com/containers/podman/issues/8506[
+Start of rootless container in systemd hangs (Can't open PID file /run/user/1000/containers/overlay-containers/**/*.pid
+(yet?) after start: Permission denied) #8506]
+* https://www.freedesktop.org/software/systemd/man/systemd.unit.html[
+systemd.unit — Unit configuration]
