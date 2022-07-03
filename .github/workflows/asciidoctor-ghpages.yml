@@ -19,9 +19,12 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v3
-      
-    - name: asciidoctor-ghpages
-      uses: manoelcampos/asciidoctor-ghpages-action@v2.2.4
       with:
-        asciidoctor_params: 
+        submodules: recursive
+        fetch-depth: 0
+       
+    - name: asciidoctor-ghpages
+      uses: cpolizzi/asciidoctor-ghpages-action@main
+      with:
+        asciidoctor_params: -r ./asciidoctor-extensions-lab/lib/git-metadata-preprocessor.rb
         pdf_build: false

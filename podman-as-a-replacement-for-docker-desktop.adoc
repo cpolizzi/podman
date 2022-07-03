@@ -1,11 +1,14 @@
 {title}
 =======
+=======
+Created on {creation-timestamp}
 :doctype: article
 :title: Podman as a Replacement for Docker Desktop
 :author: Christian J. Polizzi <christian.polizzi@redhat.com>, Henry Hellbusch <hhellbus@redhat.com>
 :last-update-label: Last updated: 
 :version-label: Revision
-:revnumber: 1.0
+:revnumber: {git-metadata-sha-short}
+:setanchors:
 :docinfo: shared
 :data-uri:
 :toc: left
@@ -29,7 +32,9 @@ endif::[]
 
 toc::[]
 
-== Summary
+Repository: {git-metadata-remotes-origin}[
+GitHub
+]
 
 Many customers are looking at Podman as a replacement for Docker Desktop now that it is pay to use for businesses.  Many
 of those customers are using Docker Compose and want to continue using it.  This article describes set up of Podman's

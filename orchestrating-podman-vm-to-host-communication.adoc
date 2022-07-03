@@ -1,12 +1,15 @@
 {title}
 =======
+=======
+Created on {creation-timestamp}
 :doctype: article
 :title: Orchestrating Podman VM to Host Communication
 :author: Christian J. Polizzi
 :email: christian.polizzi@redhat.com
 :last-update-label: Last updated: 
 :version-label: Revision
-:revnumber: 1.0
+:revnumber: {git-metadata-sha-short}
+:setanchors:
 :docinfo: shared
 :data-uri:
 :toc: left
@@ -30,7 +33,9 @@ endif::[]
 
 toc::[]
 
-== Introduction
+Repository: {git-metadata-remotes-origin}[
+GitHub
+]
 
 The Podman managed machine is a virtual machine (VM) and is enabled and managed via the Podman command line interface
 (CLI). https://www.qemu.org/[QEMU] is used as the "hypervisor". On non-Linux hosts Podman requires a VM (or another

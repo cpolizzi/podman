@@ -1,12 +1,15 @@
 {title}
 =======
+=======
+Created on {creation-timestamp}
 :doctype: article
 :title: Enabling QEMU CLI Monitoring and Logging
 :author: Christian J. Polizzi
 :email: christian.polizzi@redhat.com
 :last-update-label: Last updated: 
 :version-label: Revision
-:revnumber: 1.0
+:revnumber: {git-metadata-sha-short}
+:setanchors:
 :docinfo: shared
 :data-uri:
 :toc: left
@@ -29,6 +32,10 @@ ifdef::env-github[]
 endif::[]
 
 toc::[]
+
+Repository: {git-metadata-remotes-origin}[
+GitHub
+]
 
 QEMU can redirect a guest VM's console output to a log file on the host from the moment the guest VM operating system
 starts to emit output to its console device. QEMU also has a monitor service that can be used to interact with the guest
