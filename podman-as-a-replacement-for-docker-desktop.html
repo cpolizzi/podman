@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="author" content="Christian J. Polizzi &lt;christian.polizzi@redhat.com&gt;, Henry Hellbusch &lt;hhellbus@redhat.com&gt;">
+<title>Podman as a Replacement for Docker Desktop</title>
+<style>
+@import url(styles/themes/css/fedora.css);
+
+pre code {
+	background-color: #eeeeee !important;
+	padding: 1em;
+	word-wrap: break-word;
+	white-space: pre-wrap;
+    border: 1px dotted black;
+    border-left: 3px solid #336699;
+}
+
+/*
+#author {
+    background-color: #ee332a;
+    color: white;
+}
+
+#email * {
+    background-color: #ee332a;
+    color: white;
+}
+*/
+
+#toc a:hover {
+    background-color: white;
+}
+
+#toctitle {
+    background-color: #3c6eb4;
+    color: white;
+}
+
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+pre.rouge table td { padding: 5px; }
+pre.rouge table pre { margin: 0; }
+pre.rouge .cm {
+  color: #999988;
+  font-style: italic;
+}
+pre.rouge .cp {
+  color: #999999;
+  font-weight: bold;
+}
+pre.rouge .c1 {
+  color: #999988;
+  font-style: italic;
+}
+pre.rouge .cs {
+  color: #999999;
+  font-weight: bold;
+  font-style: italic;
+}
+pre.rouge .c, pre.rouge .ch, pre.rouge .cd, pre.rouge .cpf {
+  color: #999988;
+  font-style: italic;
+}
+pre.rouge .err {
+  color: #a61717;
+  background-color: #e3d2d2;
+}
+pre.rouge .gd {
+  color: #000000;
+  background-color: #ffdddd;
+}
+pre.rouge .ge {
+  color: #000000;
+  font-style: italic;
+}
+pre.rouge .gr {
+  color: #aa0000;
+}
+pre.rouge .gh {
+  color: #999999;
+}
+pre.rouge .gi {
+  color: #000000;
+  background-color: #ddffdd;
+}
+pre.rouge .go {
+  color: #888888;
+}
+pre.rouge .gp {
+  color: #555555;
+}
+pre.rouge .gs {
+  font-weight: bold;
+}
+pre.rouge .gu {
+  color: #aaaaaa;
+}
+pre.rouge .gt {
+  color: #aa0000;
+}
+pre.rouge .kc {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kd {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kn {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kp {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kr {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kt {
+  color: #445588;
+  font-weight: bold;
+}
+pre.rouge .k, pre.rouge .kv {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .mf {
+  color: #009999;
+}
+pre.rouge .mh {
+  color: #009999;
+}
+pre.rouge .il {
+  color: #009999;
+}
+pre.rouge .mi {
+  color: #009999;
+}
+pre.rouge .mo {
+  color: #009999;
+}
+pre.rouge .m, pre.rouge .mb, pre.rouge .mx {
+  color: #009999;
+}
+pre.rouge .sa {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .sb {
+  color: #d14;
+}
+pre.rouge .sc {
+  color: #d14;
+}
+pre.rouge .sd {
+  color: #d14;
+}
+pre.rouge .s2 {
+  color: #d14;
+}
+pre.rouge .se {
+  color: #d14;
+}
+pre.rouge .sh {
+  color: #d14;
+}
+pre.rouge .si {
+  color: #d14;
+}
+pre.rouge .sx {
+  color: #d14;
+}
+pre.rouge .sr {
+  color: #009926;
+}
+pre.rouge .s1 {
+  color: #d14;
+}
+pre.rouge .ss {
+  color: #990073;
+}
+pre.rouge .s, pre.rouge .dl {
+  color: #d14;
+}
+pre.rouge .na {
+  color: #008080;
+}
+pre.rouge .bp {
+  color: #999999;
+}
+pre.rouge .nb {
+  color: #0086B3;
+}
+pre.rouge .nc {
+  color: #445588;
+  font-weight: bold;
+}
+pre.rouge .no {
+  color: #008080;
+}
+pre.rouge .nd {
+  color: #3c5d5d;
+  font-weight: bold;
+}
+pre.rouge .ni {
+  color: #800080;
+}
+pre.rouge .ne {
+  color: #990000;
+  font-weight: bold;
+}
+pre.rouge .nf, pre.rouge .fm {
+  color: #990000;
+  font-weight: bold;
+}
+pre.rouge .nl {
+  color: #990000;
+  font-weight: bold;
+}
+pre.rouge .nn {
+  color: #555555;
+}
+pre.rouge .nt {
+  color: #000080;
+}
+pre.rouge .vc {
+  color: #008080;
+}
+pre.rouge .vg {
+  color: #008080;
+}
+pre.rouge .vi {
+  color: #008080;
+}
+pre.rouge .nv, pre.rouge .vm {
+  color: #008080;
+}
+pre.rouge .ow {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .o {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .w {
+  color: #bbbbbb;
+}
+pre.rouge {
+  background-color: #f8f8f8;
+}
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>Podman as a Replacement for Docker Desktop</h1>
+<div class="details">
+<span id="author" class="author">Christian J. Polizzi &lt;christian.polizzi@redhat.com&gt;, Henry Hellbusch &lt;hhellbus@redhat.com&gt;</span><br>
+<span id="revnumber">revision 08d057a,</span>
+<span id="revdate">Created on 2022-06-13 15:32:49 -0500</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_introduction">1. Introduction</a></li>
+<li><a href="#_what_is_docker_desktop">2. What is Docker Desktop</a></li>
+<li><a href="#_what_is_podman">3. What is Podman</a></li>
+<li><a href="#_what_about_podman_compose">4. What about Podman Compose?</a></li>
+<li><a href="#_configuring_docker_and_docker_compose_to_utilize_the_podman_machine">5. Configuring Docker and Docker Compose to Utilize the Podman Machine</a></li>
+<li><a href="#_corporate_network_considerations">6. Corporate Network Considerations</a>
+<ul class="sectlevel2">
+<li><a href="#_systemd_global_approach">6.1. SystemD Global Approach</a></li>
+<li><a href="#_systemd_drop_in_approach">6.2. SystemD Drop-In Approach</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<!-- toc disabled -->
+<div class="paragraph">
+<p>Repository: <a href="https://github.com/cpolizzi/podman">
+GitHub
+</a></p>
+</div>
+<div class="paragraph">
+<p>Many customers are looking at Podman as a replacement for Docker Desktop now that it is pay to use for businesses.  Many
+of those customers are using Docker Compose and want to continue using it.  This article describes set up of Podman&#8217;s
+daemon connection such that Docker Compose can utilize it. This article will also explore some considerations for
+running Podman in a restrictive corporate environment enforced by firewalls and a proxy infrastructure that also uses
+SSL inspection where they resign the traffic with their corporate (self-signed) certificates in order to inspect all
+outbound requests beyond the private security enclave.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This is a shared effort between Henry Hellbusch, Red Hat Senior Consultant, and myself, Red Hat Architect.  Together we
+worked out details of working with Podman to replace Docker Desktop entirely, integrate Docker and Docker Compose with
+Podman and enabled Podman to function in restrictive corporate environments. The original article is available on
+<a href="https://source.redhat.com/personal_blogs/wip_podman_as_replacement_for_docker_desktop_docker_compose">The Source</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_is_docker_desktop"><a class="anchor" href="#_what_is_docker_desktop"></a>2. What is Docker Desktop</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Docker Desktop distributes their ecosystem of tools to Windows and Mac machines.  Docker desktop also provides a UI as
+well for developers to manage the ecosystem. Windows and Mac do not have native capabilities to run Linux containers.
+(Nowadays, Windows has more native capabilities nowadays with Windows Subsystems for Linux and Windows containers). To
+provide this capability Docker Desktop creates and manages a virtual machine running Linux with the docker daemon API
+exposed to the host (formerly this was accomplished via <a href="https://docs.docker.com/machine/">Docker Machine</a> which has been
+deprecated in factor of Docker Desktop).  Docker Desktop orchestrates the works of the creation of the Docker Machine.
+One can create a Docker Machine directly as well, but it is often difficult to do for many developers. Docker Desktop
+also provides <strong>docker-compose</strong>, the <strong>docker</strong> CLI, and now a distribution of Kubernetes.  The individual components
+deployed with Docker Desktop are open sourced under the Apache 2 license. To the extent of open development is difficult
+to ascertain in some cases. For example, Docker Dektop&#8217;s GitHub page hasn&#8217;t had any updates in years.  Docker Desktop
+itself is closed source.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_is_podman"><a class="anchor" href="#_what_is_podman"></a>3. What is Podman</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Podman is a drop in replacement for the Docker engine and CLI.  It is  a community project sponsored by Red Hat.  Many
+simply set an alias for <strong>docker</strong> to point to <strong>podman</strong> and never think about Docker again (<em>doing so however will not
+work in the context of a script when the alias is set externally from the script</em>).  Podman implements a similar
+architecture as docker to enable Windows and Mac machines run Linux Containers.  To enable this, Podman recently added a
+Podman daemon that exposes an API to allow for remote calls to Podman.  Podman can also create and managed a virtual
+machine running Fedora CoreOS (FCOS) known as the Podman managed machine.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_about_podman_compose"><a class="anchor" href="#_what_about_podman_compose"></a>4. What about Podman Compose?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There is an open source community project called Podman Compose. This is not a Red Hat sponsored project. This project
+was developed before the Podman daemon was created.  As a result, it utilizes the Podman CLI instead of the API.
+<strong>podman-compose</strong> can read and process a Docker Compose file, but does not deploy the resulting containers in the exact
+same way that docker does.  Instead Podman Compose puts every compose service as a container into a single pod ; for the
+most part this is compatible with Docker&#8217;s approach of individual containers.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuring_docker_and_docker_compose_to_utilize_the_podman_machine"><a class="anchor" href="#_configuring_docker_and_docker_compose_to_utilize_the_podman_machine"></a>5. Configuring Docker and Docker Compose to Utilize the Podman Machine</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can configure the Docker and Docker Compose to interact with the Podman machine. The API exposed by the Podman
+daemon implements the same API as the Docker daemon.  Docker allows you to configure different contexts to point to
+different remote machines.  To utilize the Podman daemon (machine) with Podman 3.x one must create an SSH tunnel to
+point to the Podman API socket (<em>this is not necessary on Linux hosts</em>). To do this simply run a command like the
+following:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">ssh <span class="nt">-vvv</span> <span class="nt">-nNT</span> <span class="nt">-L</span> ~/podman.sock:/run/user/1000/podman/podman.sock</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With podman With Podman 4.x one can simply point to the Podman socket without the extra tunnel.  We will cover this in a
+future article along with more details and usage surrounding Podman 4.x.</p>
+</div>
+<div class="paragraph">
+<p>To create the Docker context, run a command like the following:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">docker context create podman <span class="se">\</span>
+    <span class="nt">--default-stack-orchestrator</span> swarm <span class="se">\</span>
+    <span class="nt">--description</span> podman –docker <span class="se">\</span>
+    <span class="nv">host</span><span class="o">=</span>unix:///Users/shadowman/podman.sock</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And then to use the newly created context:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">docker use podman</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>From now on, all <strong>docker</strong> and <strong>docker-compose</strong> commands will utilize the Podman machine for the back end.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_corporate_network_considerations"><a class="anchor" href="#_corporate_network_considerations"></a>6. Corporate Network Considerations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>All corporations internal (private) networks are secured with various firewalls,
+inspection solutions and intrusion detection and prevention solutions.  Almost all of them require all externally bound
+network requests to pass through an internally facing proxy infrastructure (e.g., to access web resources beyond the
+security enclave of the corporate private network).  Many also incorporate into their proxy infrastructures SSL
+inspection which more often than not is implemented by re-signing SSL traffic with the certificate(s) that the
+corporation controls and publishes.  Many times these certificates are typically self-signed and the client machines are
+configured to trust this self signed certification.  In order to allow Podman to access external resources (e.g.,
+external image registries) through such a proxy, one must teach Podman in the managed machine which proxy to use and if
+SSL inspection is in play then we must also ensure that these certificate(s) used to re-sign the SSL traffic are trusted
+as well.</p>
+</div>
+<div class="paragraph">
+<p>It is entirely possible to configure the Podman managed VM, because this where the configuration needs to happen, how to
+use both a proxy and a proxy that uses SSL inspection.  Normally we we would leveage SystemD drop-in unit files but this
+does not work Podman.  Thus our only recourse in environments that require to route external requests via a proxy must
+be done, unfortunately, globally via SystemD.</p>
+</div>
+<div class="sect2">
+<h3 id="_systemd_global_approach"><a class="anchor" href="#_systemd_global_approach"></a>6.1. SystemD Global Approach</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>It should be noted that this approach will affect every single SystemD service.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>First, we create the following file <strong>10-default-env.conf</strong>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing 1. 10-default-env.conf</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="ini"><span class="nn">[Manager]</span>
+<span class="py">DefaultEnvironment</span><span class="p">=</span><span class="s">"HTTP_PROXY=http://proxy.example.com:8080"</span>
+<span class="py">DefaultEnvironment</span><span class="p">=</span><span class="s">"HTTPS_PROXY=http://proxy.example.com:8080"</span>
+<span class="py">DefaultEnvironment</span><span class="p">=</span><span class="s">"NO_PROXY=.example.com,localhost,127.0.0.1,0.0.0.0,::1"</span>
+
+<span class="py">DefaultEnvironment</span><span class="p">=</span><span class="s">"http_proxy=http://proxy.example.com:8080"</span>
+<span class="py">DefaultEnvironment</span><span class="p">=</span><span class="s">"https_proxy=http://proxy.example.com:8080"</span>
+<span class="py">DefaultEnvironment</span><span class="p">=</span><span class="s">"no_proxy=.example.com,localhost,127.0.0.1,0.0.0.0,::1"</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Next we add this to SystemD:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">sudo install</span> <span class="nt">-o</span> root <span class="nt">-g</span> root <span class="nt">-m</span> 0755 <span class="nt">-d</span> /etc/systemd/system.conf.d
+<span class="nb">sudo install</span> <span class="nt">-o</span> root <span class="nt">-g</span> root <span class="nt">-m</span> 0644 10-default-env.conf /etc/systemd/system.conf.d</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the proxy to be used performs active SSL inspection then the relevant certificates must be provisioned at the system
+level (e.g., globally):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">sudo install</span> <span class="nt">-o</span> root <span class="nt">-g</span> root <span class="nt">-m</span> 0644 <span class="k">*</span>.crt /etc/pki/ca-trust/source/anchors
+<span class="nb">sudo </span>update-ca-trust</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Finally we reboot because there is no way to have SystemD reload the default environment:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">sudo </span>systemctl reboot</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_systemd_drop_in_approach"><a class="anchor" href="#_systemd_drop_in_approach"></a>6.2. SystemD Drop-In Approach</h3>
+<div class="paragraph">
+<p>As previously mentioned Podman cannot be configured to use a proxy at all via SystemD unit files. Because if it could we
+could add a SystemD drop-in for the Podman service.  It is unfortunate that Podman does not respect this because the
+SystemD drop-in mechanism is rather elegant.  For a moment, let us entertain the thought of: "What if Podman did respect
+SystemD properly?"  If this were the case it is really rather straight forward.</p>
+</div>
+<div class="paragraph">
+<p>We would first create the drop-in unit file <strong>podman.conf</strong>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing 2. podman.conf</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="ini"><span class="nn">[Service]</span>
+<span class="py">EnvironmentFile</span><span class="p">=</span><span class="s">/etc/proxy.env</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We would then add this drop-in to SystemD (the SystemD drop in  ensures that this will affect only the configured
+service and allows us to augment or override the main unit file, without touching the main unit file at all):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">sudo install</span> <span class="nt">-o</span> root <span class="nt">-g</span> root <span class="nt">-m</span> 0755 <span class="nt">-d</span> /etc/systemd/system/podman.service.d
+<span class="nb">sudo install</span> <span class="nt">-o</span> root <span class="nt">-g</span> root <span class="nt">-m</span> 0644 podman.conf /etc/systemd/system/podman.service.d</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then we would create the file that defines the environment variables as <strong>proxy.env</strong>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing 3. proxy.env</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nv">HTTP_PROXY</span><span class="o">=</span>http://proxy.example.com:8080
+<span class="nv">HTTPS_PROXY</span><span class="o">=</span>http://proxy.example.com:8080
+<span class="nv">NO_PROXY</span><span class="o">=</span>.example.com,localhost,127.0.0.1,0.0.0.0,::1
+<span class="nv">http_proxy</span><span class="o">=</span>http://proxy.example.com:8080
+<span class="nv">https_proxy</span><span class="o">=</span>http://proxy.example.com:8080
+<span class="nv">no_proxy</span><span class="o">=</span>.example.com,localhost,127.0.0.1,0.0.0.0,::1</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Next we would make this available in the expected location on the file system and restart the Podman service:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">sudo install</span> <span class="nt">-o</span> root <span class="nt">-g</span> root <span class="nt">-m</span> 0644 proxy.env /etc/proxy.env
+<span class="nb">sudo </span>systemctl daemon-reload
+<span class="nb">sudo </span>systemctl restart podman.service</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Elegant, we know.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Revision 08d057a<br>
+Last updated: 2022-07-03 23:13:31 UTC
+</div>
+</div>
+</body>
+</html>

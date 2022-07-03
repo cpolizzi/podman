@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="author" content="Christian J. Polizzi">
+<title>Starting Podman Continers at System Boot</title>
+<style>
+@import url(styles/themes/css/fedora.css);
+
+pre code {
+	background-color: #eeeeee !important;
+	padding: 1em;
+	word-wrap: break-word;
+	white-space: pre-wrap;
+    border: 1px dotted black;
+    border-left: 3px solid #336699;
+}
+
+/*
+#author {
+    background-color: #ee332a;
+    color: white;
+}
+
+#email * {
+    background-color: #ee332a;
+    color: white;
+}
+*/
+
+#toc a:hover {
+    background-color: white;
+}
+
+#toctitle {
+    background-color: #3c6eb4;
+    color: white;
+}
+
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+pre.rouge table td { padding: 5px; }
+pre.rouge table pre { margin: 0; }
+pre.rouge .cm {
+  color: #999988;
+  font-style: italic;
+}
+pre.rouge .cp {
+  color: #999999;
+  font-weight: bold;
+}
+pre.rouge .c1 {
+  color: #999988;
+  font-style: italic;
+}
+pre.rouge .cs {
+  color: #999999;
+  font-weight: bold;
+  font-style: italic;
+}
+pre.rouge .c, pre.rouge .ch, pre.rouge .cd, pre.rouge .cpf {
+  color: #999988;
+  font-style: italic;
+}
+pre.rouge .err {
+  color: #a61717;
+  background-color: #e3d2d2;
+}
+pre.rouge .gd {
+  color: #000000;
+  background-color: #ffdddd;
+}
+pre.rouge .ge {
+  color: #000000;
+  font-style: italic;
+}
+pre.rouge .gr {
+  color: #aa0000;
+}
+pre.rouge .gh {
+  color: #999999;
+}
+pre.rouge .gi {
+  color: #000000;
+  background-color: #ddffdd;
+}
+pre.rouge .go {
+  color: #888888;
+}
+pre.rouge .gp {
+  color: #555555;
+}
+pre.rouge .gs {
+  font-weight: bold;
+}
+pre.rouge .gu {
+  color: #aaaaaa;
+}
+pre.rouge .gt {
+  color: #aa0000;
+}
+pre.rouge .kc {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kd {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kn {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kp {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kr {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kt {
+  color: #445588;
+  font-weight: bold;
+}
+pre.rouge .k, pre.rouge .kv {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .mf {
+  color: #009999;
+}
+pre.rouge .mh {
+  color: #009999;
+}
+pre.rouge .il {
+  color: #009999;
+}
+pre.rouge .mi {
+  color: #009999;
+}
+pre.rouge .mo {
+  color: #009999;
+}
+pre.rouge .m, pre.rouge .mb, pre.rouge .mx {
+  color: #009999;
+}
+pre.rouge .sa {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .sb {
+  color: #d14;
+}
+pre.rouge .sc {
+  color: #d14;
+}
+pre.rouge .sd {
+  color: #d14;
+}
+pre.rouge .s2 {
+  color: #d14;
+}
+pre.rouge .se {
+  color: #d14;
+}
+pre.rouge .sh {
+  color: #d14;
+}
+pre.rouge .si {
+  color: #d14;
+}
+pre.rouge .sx {
+  color: #d14;
+}
+pre.rouge .sr {
+  color: #009926;
+}
+pre.rouge .s1 {
+  color: #d14;
+}
+pre.rouge .ss {
+  color: #990073;
+}
+pre.rouge .s, pre.rouge .dl {
+  color: #d14;
+}
+pre.rouge .na {
+  color: #008080;
+}
+pre.rouge .bp {
+  color: #999999;
+}
+pre.rouge .nb {
+  color: #0086B3;
+}
+pre.rouge .nc {
+  color: #445588;
+  font-weight: bold;
+}
+pre.rouge .no {
+  color: #008080;
+}
+pre.rouge .nd {
+  color: #3c5d5d;
+  font-weight: bold;
+}
+pre.rouge .ni {
+  color: #800080;
+}
+pre.rouge .ne {
+  color: #990000;
+  font-weight: bold;
+}
+pre.rouge .nf, pre.rouge .fm {
+  color: #990000;
+  font-weight: bold;
+}
+pre.rouge .nl {
+  color: #990000;
+  font-weight: bold;
+}
+pre.rouge .nn {
+  color: #555555;
+}
+pre.rouge .nt {
+  color: #000080;
+}
+pre.rouge .vc {
+  color: #008080;
+}
+pre.rouge .vg {
+  color: #008080;
+}
+pre.rouge .vi {
+  color: #008080;
+}
+pre.rouge .nv, pre.rouge .vm {
+  color: #008080;
+}
+pre.rouge .ow {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .o {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .w {
+  color: #bbbbbb;
+}
+pre.rouge {
+  background-color: #f8f8f8;
+}
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>Starting Podman Continers at System Boot</h1>
+<div class="details">
+<span id="author" class="author">Christian J. Polizzi</span><br>
+<span id="email" class="email"><a href="mailto:christian.polizzi@redhat.com">christian.polizzi@redhat.com</a></span><br>
+<span id="revnumber">revision 08d057a,</span>
+<span id="revdate">Created on 2022-07-03 18:13:00 -0500</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_how_to_enable">1. How to Enable</a></li>
+<li><a href="#_references">2. References</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<!-- toc disabled -->
+<div class="paragraph">
+<p>Repository: <a href="https://github.com/cpolizzi/podman">
+GitHub
+</a></p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>This is a work in progress.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Remember, by default, Podman runs containers root-less. This is a good thing. This means that when we want to start a
+container on system boot via SystemD then we need to conform to this. The way to do this is via SystemD user level unit
+files.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_how_to_enable"><a class="anchor" href="#_how_to_enable"></a>1. How to Enable</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>First create the container manually. For this example we have chosen to run the
+<a href="https://hub.docker.com/r/linuxserver/unifi-controller">Ubiquiti Networks UniFi Controller</a>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing 1. Start the Controller</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">podman run <span class="nt">-d</span> <span class="se">\</span>
+  <span class="nt">--name</span><span class="o">=</span>unifi-controller <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">PUID</span><span class="o">=</span>1000 <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">PGID</span><span class="o">=</span>1000 <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">MEM_LIMIT</span><span class="o">=</span>1024 <span class="sb">`</span><span class="c">#optional` \</span>
+  <span class="nt">-e</span> <span class="nv">MEM_STARTUP</span><span class="o">=</span>1024 <span class="sb">`</span><span class="c">#optional` \</span>
+  <span class="nt">-p</span> 8443:8443 <span class="se">\</span>
+  <span class="nt">-p</span> 3478:3478/udp <span class="se">\</span>
+  <span class="nt">-p</span> 10001:10001/udp <span class="se">\</span>
+  <span class="nt">-p</span> 8080:8080 <span class="se">\</span>
+  <span class="nt">-p</span> 1900:1900/udp <span class="sb">`</span><span class="c">#optional` \</span>
+  <span class="nt">-p</span> 8843:8843 <span class="sb">`</span><span class="c">#optional` \</span>
+  <span class="nt">-p</span> 8880:8880 <span class="sb">`</span><span class="c">#optional` \</span>
+  <span class="nt">-p</span> 6789:6789 <span class="sb">`</span><span class="c">#optional` \</span>
+  <span class="nt">-p</span> 5514:5514/udp <span class="sb">`</span><span class="c">#optional` \</span>
+  <span class="nt">-v</span> unifi-config:/config <span class="se">\</span>
+  <span class="nt">--restart</span> unless-stopped <span class="se">\</span>
+  lscr.io/linuxserver/unifi-controller</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Next we generate the SystemD unit for the controller and arrange for this container to be run on system boot:</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing 2. SystemD Enablement</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">podman generate systemd <span class="nt">--name</span> unifi-controller <span class="nt">--files</span> <span class="nt">--container-prefix</span> podman          <i class="conum" data-value="1"></i><b>(1)</b>
+<span class="nb">sudo install</span> <span class="nt">-o</span> root <span class="nt">-g</span> root <span class="nt">-m</span> 0644 podman-unifi-controller.service /etc/systemd/user/    <i class="conum" data-value="2"></i><b>(2)</b>
+loginctl enable-linger core                                                                <i class="conum" data-value="3"></i><b>(3)</b>
+systemctl <span class="nt">--user</span> daemon-reload                                                             <i class="conum" data-value="4"></i><b>(4)</b>
+systemctl <span class="nt">--user</span> <span class="nb">enable </span>podman-unifi-controller.service                                    <i class="conum" data-value="5"></i><b>(5)</b>
+systemctl <span class="nt">--user</span> start podman-unifi-controller.service                                     <i class="conum" data-value="6"></i><b>(6)</b>
+systemctl <span class="nt">--user</span> status podman-unifi-controller.service                                    <i class="conum" data-value="7"></i><b>(7)</b>
+podman ps                                                                                  <i class="conum" data-value="8"></i><b>(8)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Generates the SystemD service unit file from the running container and prefixes the unit file with <code>podman-</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Installs the SystemD unit file at the SystemD user scope</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Allows the user scoped SystemD unit file to be spawned at system boot</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Refreshes SystemD&#8217;s knowledge of all unit files</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Enables the SystemD unit file for this specific container only to be be started at system boot</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Starts the SystemD unit file for this specific container only for the current session</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Verifies that the SystemD service status</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>Pulls all active Podman running containers</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The real proof is when you reboot the host:</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing 3. Validation</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">sudo </span>systemctl reboot
+podman ps</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once it reboots we should be able to connect to our user level rootless container. Since we are using the Unifi
+Controller this means directing a web browser to the host that is running the container on port <code>8443</code> for the web UI.
+If you are doing this locally then your URL would be on your <a href="https://localhost:8443">localhost</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_references"><a class="anchor" href="#_references"></a>2. References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://www.tutorialworks.com/podman-systemd/">
+How to Start a Container on Boot with Podman and Systemd</a></p>
+</li>
+<li>
+<p><a href="https://access.redhat.com/discussions/5733161">
+Red Hat Solutions - How to Auto-starting rootless pods using systemd</a></p>
+</li>
+<li>
+<p><a href="https://github.com/containers/podman/blob/main/docs/source/markdown/podman-generate-systemd.1.md#installation-of-generated-systemd-unit-files">
+Installation of generated systemd unit files</a></p>
+</li>
+<li>
+<p><a href="https://github.com/containers/podman/issues/8504">
+Rootless container doesn&#8217;t start at systemstart: Error: no container with name or ID &lt;container ID&gt;
+found: no such container #8504</a></p>
+</li>
+<li>
+<p><a href="https://github.com/containers/podman/issues/8506">
+Start of rootless container in systemd hangs (Can&#8217;t open PID file /run/user/1000/containers/overlay-containers/<strong>*/</strong>.pid
+(yet?) after start: Permission denied) #8506</a></p>
+</li>
+<li>
+<p><a href="https://www.freedesktop.org/software/systemd/man/systemd.unit.html">
+systemd.unit — Unit configuration</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Revision 08d057a<br>
+Last updated: 2022-07-03 23:13:31 UTC
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="author" content="Christian J. Polizzi">
+<title>Orchestrating Podman VM to Host Communication</title>
+<style>
+@import url(styles/themes/css/fedora.css);
+
+pre code {
+	background-color: #eeeeee !important;
+	padding: 1em;
+	word-wrap: break-word;
+	white-space: pre-wrap;
+    border: 1px dotted black;
+    border-left: 3px solid #336699;
+}
+
+/*
+#author {
+    background-color: #ee332a;
+    color: white;
+}
+
+#email * {
+    background-color: #ee332a;
+    color: white;
+}
+*/
+
+#toc a:hover {
+    background-color: white;
+}
+
+#toctitle {
+    background-color: #3c6eb4;
+    color: white;
+}
+
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+pre.rouge table td { padding: 5px; }
+pre.rouge table pre { margin: 0; }
+pre.rouge .cm {
+  color: #999988;
+  font-style: italic;
+}
+pre.rouge .cp {
+  color: #999999;
+  font-weight: bold;
+}
+pre.rouge .c1 {
+  color: #999988;
+  font-style: italic;
+}
+pre.rouge .cs {
+  color: #999999;
+  font-weight: bold;
+  font-style: italic;
+}
+pre.rouge .c, pre.rouge .ch, pre.rouge .cd, pre.rouge .cpf {
+  color: #999988;
+  font-style: italic;
+}
+pre.rouge .err {
+  color: #a61717;
+  background-color: #e3d2d2;
+}
+pre.rouge .gd {
+  color: #000000;
+  background-color: #ffdddd;
+}
+pre.rouge .ge {
+  color: #000000;
+  font-style: italic;
+}
+pre.rouge .gr {
+  color: #aa0000;
+}
+pre.rouge .gh {
+  color: #999999;
+}
+pre.rouge .gi {
+  color: #000000;
+  background-color: #ddffdd;
+}
+pre.rouge .go {
+  color: #888888;
+}
+pre.rouge .gp {
+  color: #555555;
+}
+pre.rouge .gs {
+  font-weight: bold;
+}
+pre.rouge .gu {
+  color: #aaaaaa;
+}
+pre.rouge .gt {
+  color: #aa0000;
+}
+pre.rouge .kc {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kd {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kn {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kp {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kr {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kt {
+  color: #445588;
+  font-weight: bold;
+}
+pre.rouge .k, pre.rouge .kv {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .mf {
+  color: #009999;
+}
+pre.rouge .mh {
+  color: #009999;
+}
+pre.rouge .il {
+  color: #009999;
+}
+pre.rouge .mi {
+  color: #009999;
+}
+pre.rouge .mo {
+  color: #009999;
+}
+pre.rouge .m, pre.rouge .mb, pre.rouge .mx {
+  color: #009999;
+}
+pre.rouge .sa {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .sb {
+  color: #d14;
+}
+pre.rouge .sc {
+  color: #d14;
+}
+pre.rouge .sd {
+  color: #d14;
+}
+pre.rouge .s2 {
+  color: #d14;
+}
+pre.rouge .se {
+  color: #d14;
+}
+pre.rouge .sh {
+  color: #d14;
+}
+pre.rouge .si {
+  color: #d14;
+}
+pre.rouge .sx {
+  color: #d14;
+}
+pre.rouge .sr {
+  color: #009926;
+}
+pre.rouge .s1 {
+  color: #d14;
+}
+pre.rouge .ss {
+  color: #990073;
+}
+pre.rouge .s, pre.rouge .dl {
+  color: #d14;
+}
+pre.rouge .na {
+  color: #008080;
+}
+pre.rouge .bp {
+  color: #999999;
+}
+pre.rouge .nb {
+  color: #0086B3;
+}
+pre.rouge .nc {
+  color: #445588;
+  font-weight: bold;
+}
+pre.rouge .no {
+  color: #008080;
+}
+pre.rouge .nd {
+  color: #3c5d5d;
+  font-weight: bold;
+}
+pre.rouge .ni {
+  color: #800080;
+}
+pre.rouge .ne {
+  color: #990000;
+  font-weight: bold;
+}
+pre.rouge .nf, pre.rouge .fm {
+  color: #990000;
+  font-weight: bold;
+}
+pre.rouge .nl {
+  color: #990000;
+  font-weight: bold;
+}
+pre.rouge .nn {
+  color: #555555;
+}
+pre.rouge .nt {
+  color: #000080;
+}
+pre.rouge .vc {
+  color: #008080;
+}
+pre.rouge .vg {
+  color: #008080;
+}
+pre.rouge .vi {
+  color: #008080;
+}
+pre.rouge .nv, pre.rouge .vm {
+  color: #008080;
+}
+pre.rouge .ow {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .o {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .w {
+  color: #bbbbbb;
+}
+pre.rouge {
+  background-color: #f8f8f8;
+}
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>Orchestrating Podman VM to Host Communication</h1>
+<div class="details">
+<span id="author" class="author">Christian J. Polizzi</span><br>
+<span id="email" class="email"><a href="mailto:christian.polizzi@redhat.com">christian.polizzi@redhat.com</a></span><br>
+<span id="revnumber">revision 08d057a,</span>
+<span id="revdate">Created on 2022-06-13 15:32:49 -0500</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_rationale">1. Rationale</a></li>
+<li><a href="#_how_to_enable">2. How to Enable</a>
+<ul class="sectlevel2">
+<li><a href="#_validation">2.1. Validation</a></li>
+<li><a href="#_testing">2.2. Testing</a>
+<ul class="sectlevel3">
+<li><a href="#_netcat">2.2.1. Netcat</a></li>
+<li><a href="#_simple_http_server">2.2.2. Simple HTTP Server</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_summary">3. Summary</a></li>
+<li><a href="#_references">4. References</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<!-- toc disabled -->
+<div class="paragraph">
+<p>Repository: <a href="https://github.com/cpolizzi/podman">
+GitHub
+</a></p>
+</div>
+<div class="paragraph">
+<p>The Podman managed machine is a virtual machine (VM) and is enabled and managed via the Podman command line interface
+(CLI). <a href="https://www.qemu.org/">QEMU</a> is used as the "hypervisor". On non-Linux hosts Podman requires a VM (or another
+remote host) in order to orchestrate containers and container images. The approach that Podman has taken is highly
+similar to that of the Docker Desktop approach which is described briefly described in
+<a href="#podman-as-a-replacement-for-docker-desktop.adoc">Podman as a Replacement for Docker Desktop</a> (
+<a href="https://source.redhat.com/personal_blogs/wip_podman_as_replacement_for_docker_desktop_docker_compose">
+Red Hat The Source Article: Podman as a Replacement for Docker Desktop</a>).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_rationale"><a class="anchor" href="#_rationale"></a>1. Rationale</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>By default the Podman managed machine is accessible from the host system, including for remote access via Secure Shell
+and Secure Copy (<code>ssh</code> and <code>scp</code> respectively). There are times when one may need (or wish) to enable similar
+connectivity from the VM (guest) to the host.</p>
+</div>
+<div class="paragraph">
+<p>One such example is in restrictive environments such as corporation or government environments that require a proxy to
+access external resources beyond the trusted security enclave. In some environments the proxy infrastructure requires
+authentication. In a circumstance such as this it is not an option to store security credentials in a configuration file
+let alone embed them in some in some script. In this case the organization <em>may</em> have an inner source solution (e.g.; a
+proxy for a proxy) to handle the case of CLI (Command Line Interface) tools that are not authenticating proxy aware.</p>
+</div>
+<div class="paragraph">
+<p>Another example may simply be that one is testing out a number of things in an immutable system such as Fedora CoreOS
+(FCOS) and simply wants to transfer the result of this work back to the host via Secure Copy (<code>scp</code>) from the guest back
+to the host.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Of course with host to guest SSH and this <code>scp</code> connectivity fully enabled "out of the box" with Podman transferring files out of
+the managed machine is possible without this.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_how_to_enable"><a class="anchor" href="#_how_to_enable"></a>2. How to Enable</h2>
+<div class="sectionbody">
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>All approaches have been tested on Podman 3.4.4 and Podman 4.1.0 and on Linux and MacOS.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The way we enable this is to modify the QEMU command line for the Podman managed machine. Before we can do this we must
+first create the Podman managed machine:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">podman machine init</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once the Podman VM is created from <code>podman machine init</code> and prior to starting it we merely modify the managed machine
+JSON configuration file for the QEMU command line. We add a secondary NIC to the VM by appending the following QEMU
+options to the configuration file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="text">-device virtio-net-pci,netdev=net1 -netdev user,id=net1</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can easily make use of <a href="https://stedolan.github.io/jq/">jq</a> to do this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">jq <span class="se">\</span>
+    <span class="s1">'.CmdLine += ["-device", "virtio-net-pci,netdev=net1", "-netdev", "user,id=net1"]'</span> <span class="se">\</span>
+    ~/.config/containers/podman/machine/qemu/podman-machine-default.json <span class="o">&gt;</span> <span class="se">\</span>
+    ~/.config/containers/podman/machine/qemu/podman-machine-default.json.1
+<span class="nb">mv</span> <span class="se">\</span>
+    ~/.config/containers/podman/machine/qemu/podman-machine-default.json.1 <span class="se">\</span>
+    ~/.config/containers/podman/machine/qemu/podman-machine-default.json</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_validation"><a class="anchor" href="#_validation"></a>2.1. Validation</h3>
+<div class="paragraph">
+<p>This is easily validated as such:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">podman machine ssh ip address</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Shows us the secondary NIC has been added and is on an entirely new private network: <code>10.0.2.0/24</code> and has received the
+IP <code>10.0.2.15</code> from QEMU:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="text">3: enp0s4: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 52:54:00:12:34:56 brd ff:ff:ff:ff:ff:ff
+    inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic noprefixroute enp0s4
+       valid_lft 86276sec preferred_lft 86276sec
+    inet6 fec0::cb8a:cff7:4ca9:ab65/64 scope site dynamic noprefixroute
+       valid_lft 86279sec preferred_lft 14279sec
+    inet6 fe80::7e27:585d:5391:2a5e/64 scope link noprefixroute
+       valid_lft forever preferred_lft forever</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And a new route has now been created as well:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">podman machine ssh route <span class="nt">-n</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Yields:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="text">Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+0.0.0.0         192.168.127.1   0.0.0.0         UG    100    0        0 enp0s1
+0.0.0.0         10.0.2.2        0.0.0.0         UG    101    0        0 enp0s4
+10.0.2.0        0.0.0.0         255.255.255.0   U     101    0        0 enp0s4
+192.168.127.0   0.0.0.0         255.255.255.0   U     100    0        0 enp0s1</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Take note of the default gateway of <code>10.0.2.2</code>. This is the special IP that QEMU will accept connections from a VM to
+the host, provided that there is a service bound to the host port.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://media.giphy.com/media/5torAmNR6lQB0HRHBa/giphy.gif" alt="giphy">
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_testing"><a class="anchor" href="#_testing"></a>2.2. Testing</h3>
+<div class="paragraph">
+<p>Now we test our connectivity.</p>
+</div>
+<div class="sect3">
+<h4 id="_netcat"><a class="anchor" href="#_netcat"></a>2.2.1. Netcat</h4>
+<div class="paragraph">
+<p>On the host we will wait for an inbound connection and provide a response back to the remote TCP client.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">cat</span> <span class="o">&lt;&lt;</span><span class="no">EOM</span><span class="sh"> | nc -lv -w 1 8080
+HTTP/1.1 200 OK
+
+Hello from </span><span class="si">$(</span><span class="nb">hostname</span> <span class="nt">-f</span><span class="si">)</span><span class="sh">
+EOM</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here we bind <strong>netcat</strong> on port <code>8080</code> to all available host network interfaces, wait for a connection, provide a response
+back from an inline heredoc that also includes the FQDN of the host and then terminates the connection.</p>
+</div>
+<div class="paragraph">
+<p>And from the Podman machine we will connect to port <code>8080</code> on the host:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">podman machine ssh curl <span class="nt">-iv</span> http://10.0.2.2:8080</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Which yields:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="text">*   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+&gt; GET / HTTP/1.1
+&gt; Host: localhost:8080
+&gt; User-Agent: curl/7.79.1
+&gt; Accept: */*
+&gt;
+* Mark bundle as not supporting multiuse
+&lt; HTTP/1.1 200 OK
+HTTP/1.1 200 OK
+* no chunk, no close, no size. Assume close to signal end
+
+&lt;
+Hello from mac-mini.n7.priv
+* Closing connection 0</code></pre>
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://media.giphy.com/media/l46CDHTqbmnGZyxKo/giphy.gif" alt="giphy">
+</div>
+</div>
+<div class="paragraph">
+<p>Excellent, now, we will further illustrate by spinning up a one line HTTP server listening on all host interfaces, bind
+it to port <code>8080</code> and fulfilling HTTP requests from the user home directory. On the host:</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_simple_http_server"><a class="anchor" href="#_simple_http_server"></a>2.2.2. Simple HTTP Server</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">python3 <span class="nt">-m</span> http.server <span class="nt">--directory</span> ~ 8080</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And from the Podman machine we will connect to port 8080 on the host:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">podman machine ssh curl <span class="nt">-iv</span> http://10.0.2.2:8080</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Which yields:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="text">*   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+&gt; GET / HTTP/1.1
+&gt; Host: localhost:8080
+&gt; User-Agent: curl/7.79.1
+&gt; Accept: */*
+&gt;
+* Mark bundle as not supporting multiuse
+* HTTP 1.0, assume close after body
+&lt; HTTP/1.0 200 OK
+HTTP/1.0 200 OK
+&lt; Server: SimpleHTTP/0.6 Python/3.9.13
+Server: SimpleHTTP/0.6 Python/3.9.13
+&lt; Date: Wed, 08 Jun 2022 20:05:28 GMT
+Date: Wed, 08 Jun 2022 20:05:28 GMT
+&lt; Content-type: text/html; charset=utf-8
+Content-type: text/html; charset=utf-8
+&lt; Content-Length: 1509
+Content-Length: 1509
+
+&lt;
+&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"&gt;
+&lt;title&gt;Directory listing for /&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;Directory listing for /&lt;/h1&gt;
+&lt;hr&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=".cache/"&gt;.cache/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=".CFUserTextEncoding"&gt;.CFUserTextEncoding&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=".config/"&gt;.config/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=".lesshst"&gt;.lesshst&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=".local/"&gt;.local/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=".oh-my-zsh/"&gt;.oh-my-zsh/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=".p10k.zsh"&gt;.p10k.zsh&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=".ssh/"&gt;.ssh/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=".Trash/"&gt;.Trash/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=".vim/"&gt;.vim/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=".viminfo"&gt;.viminfo&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=".vimrc"&gt;.vimrc&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=".vimrc.local"&gt;.vimrc.local&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=".zcompdump"&gt;.zcompdump&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=".zcompdump-mac-mini-5.8"&gt;.zcompdump-mac-mini-5.8&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=".zsh/"&gt;.zsh/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=".zsh_history"&gt;.zsh_history&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=".zsh_sessions/"&gt;.zsh_sessions/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=".zshrc"&gt;.zshrc&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="Desktop/"&gt;Desktop/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="Documents/"&gt;Documents/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="Downloads/"&gt;Downloads/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="Library/"&gt;Library/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="Movies/"&gt;Movies/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="Music/"&gt;Music/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="Pictures/"&gt;Pictures/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="projects/"&gt;projects/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="Public/"&gt;Public/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+* Closing connection 0</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_summary"><a class="anchor" href="#_summary"></a>3. Summary</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We have shown how to enable Podman managed machine (virtual machine, VM) connectivity to the host itself with minimal
+effort. This approach can easily be extended to enabling integration from the guest to the host. There exists
+restrictive environments such that access to external Internet resources are constrained by using authenticating proxy
+servers must be used on the internal security enclave and that one desires to orchestrate a proxy for proxy. This is
+merely only one singular use case.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_references"><a class="anchor" href="#_references"></a>4. References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://osxdaily.com/2018/07/30/start-web-server-python-3/">
+How to Start a Simple Web Server in Python 3 on Mac
+</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Revision 08d057a<br>
+Last updated: 2022-07-03 23:13:31 UTC
+</div>
+</div>
+</body>
+</html>

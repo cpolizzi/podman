@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="author" content="Christian J. Polizzi">
+<title>Podman Series</title>
+<style>
+@import url(styles/themes/css/fedora.css);
+
+pre code {
+	background-color: #eeeeee !important;
+	padding: 1em;
+	word-wrap: break-word;
+	white-space: pre-wrap;
+    border: 1px dotted black;
+    border-left: 3px solid #336699;
+}
+
+/*
+#author {
+    background-color: #ee332a;
+    color: white;
+}
+
+#email * {
+    background-color: #ee332a;
+    color: white;
+}
+*/
+
+#toc a:hover {
+    background-color: white;
+}
+
+#toctitle {
+    background-color: #3c6eb4;
+    color: white;
+}
+
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="book toc2 toc-left">
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel0">
+<li><a href="#_podman_series">Podman Series</a>
+<ul class="sectlevel1">
+<li><a href="#_summary">Summary</a></li>
+<li><a href="#_articles">Articles</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<!-- toc disabled -->
+</div>
+</div>
+<h1 id="_podman_series" class="sect0"><a class="anchor" href="#_podman_series"></a>Podman Series</h1>
+<div class="openblock partintro">
+<div class="content">
+This is a Series of Podman related articles on how to achieve various things that are not clear and sometimes not trivial.
+</div>
+</div>
+<div class="sect1">
+<h2 id="_summary"><a class="anchor" href="#_summary"></a>Summary</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It also addresses using Podman in restrictive environments. Examples of such are private security enclaves such as corporations
+and government. These environments always require at least a proxy to access Internet resources beyond the private
+security enclave. Many times, but not all, the internally facing proxy requires HTTPS with privately issued certificate
+authority certificates (sometimes this is to enable SSL / TLS inspection for externally accessed resources. All of these
+impact the success rate of utilizing Podman in restrictive environments.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_articles"><a class="anchor" href="#_articles"></a>Articles</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><a href="podman-as-a-replacement-for-docker-desktop.html">Podman as a Replacement for Docker Desktop</a></p>
+</li>
+<li>
+<p><a href="orchestrating-podman-vm-to-host-communication.html">Orchestrating Podman VM to Host Communication</a></p>
+</li>
+<li>
+<p><a href="enabling-qemu-cli-monitoring-and-logging.html">Enabling QEMU CLI Monitoring and Logging</a></p>
+</li>
+<li>
+<p><a href="enabling-qemu-emulation-in-restrictive-environments.html">Enabling QEMU Emulation in Restrictive Environments</a></p>
+</li>
+<li>
+<p><a href="starting-podman-containers-at-system-boot.html">Starting Podman Continers at System Boot</a></p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
