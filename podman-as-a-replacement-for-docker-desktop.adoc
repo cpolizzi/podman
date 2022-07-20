@@ -87,12 +87,39 @@ same way that docker does.  Instead Podman Compose puts every compose service as
 most part this is compatible with Docker's approach of individual containers.
 
 
+== Exposing the podman remote socket on Linux
+
+Simply enable the podman.socket via systemctl.
+
+[source,bash]
+----
+systemctl --user --now enable podman.socket
+----
+
+And then you can get the path of the socket via 
+
+[source,bash]
+----
+systemctl --user status podman.socket       
+● podman.socket - Podman API Socket
+     Loaded: loaded (/usr/lib/systemd/user/podman.socket; enabled; vendor preset: enabled)
+     Active: active (listening) since Wed 2022-07-20 13:33:00 EDT; 8min ago
+   Triggers: ● podman.service
+       Docs: man:podman-system-service(1)
+     Listen: /run/user/1000/podman/podman.sock (Stream)
+     CGroup: /user.slice/user-1000.slice/user@1000.service/podman.socket
+----
+
+The `listen` line denotes the sock path to use.  
+
 == Configuring Docker and Docker Compose to Utilize the Podman Machine
 
 You can configure the Docker and Docker Compose to interact with the Podman machine. The API exposed by the Podman
 daemon implements the same API as the Docker daemon.  Docker allows you to configure different contexts to point to
-different remote machines.  To utilize the Podman daemon (machine) with Podman 3.x one must create an SSH tunnel to
-point to the Podman API socket (_this is not necessary on Linux hosts_). To do this simply run a command like the
+different remote machines.  
+
+On MacOS, to utilize the Podman daemon (machine) with Podman 3.x one must create an SSH tunnel to
+point to the Podman API socket (NOTE: _this is not necessary on Linux hosts_). To do this simply run a command like the
 following:
 
 [source,bash]
@@ -103,7 +130,7 @@ ssh -vvv -nNT -L ~/podman.sock:/run/user/1000/podman/podman.sock
 With podman With Podman 4.x one can simply point to the Podman socket without the extra tunnel.  We plan to cover this in a
 future article along with more details and usage surrounding Podman 4.x.
 
-To create the Docker context, run a command like the following:
+To create the Docker context on MacOS, run a command like the following:
 
 [source,bash]
 ----
@@ -111,6 +138,16 @@ docker context create podman \
     --default-stack-orchestrator swarm \
     --description podman --docker \
     host=unix:///Users/shadowman/podman.sock
+----
+
+Or on Linux:
+
+[source,bash]
+----
+docker context create podman \
+  --default-stack-orchestrator swarm \
+  --description podman --docker \
+  host=unix:///run/user/1000/podman/podman.sock
 ----
 
 And then to use the newly created context:
