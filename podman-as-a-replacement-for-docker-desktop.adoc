@@ -36,8 +36,8 @@ Repository: {git-metadata-remotes-origin}[
 GitHub
 ]
 
-Many customers are looking at Podman as a replacement for Docker Desktop now that it is pay to use for businesses.  Many
-of those customers are using Docker Compose and want to continue using it.  This article describes set up of Podman's
+Many businesses are now looking at Podman as a replacement for Docker Desktop now that it is pay to use for businesses.  Many
+of those businesses are using Docker Compose and want to continue using it.  This article describes set up of Podman's
 daemon connection such that Docker Compose can utilize it. This article will also explore some considerations for
 running Podman in a restrictive corporate environment enforced by firewalls and a proxy infrastructure that also uses
 SSL inspection where they resign the traffic with their corporate (self-signed) certificates in order to inspect all
@@ -46,9 +46,10 @@ outbound requests beyond the private security enclave.
 
 == Introduction
 
-This is a shared effort between Henry Hellbusch, Red Hat Senior Consultant, and myself, Red Hat Architect.  Together we
-worked out details of working with Podman to replace Docker Desktop entirely, integrate Docker and Docker Compose with
-Podman and enabled Podman to function in restrictive corporate environments. The original article is available on
+This is a shared effort between Henry Hellbusch, Red Hat Senior Consultant, and Chrisitan Polizzi, Red Hat Architect.  Together we've
+worked out the details of working with Podman to replace Docker Desktop entirely, integrate Docker and Docker Compose with
+Podman and enabled Podman to function in restrictive corporate environments. If you are a Red Hatter with access to the RedHat's Source, 
+the original article is available on 
 https://source.redhat.com/personal_blogs/wip_podman_as_replacement_for_docker_desktop_docker_compose[The Source].
 
 
@@ -99,7 +100,7 @@ following:
 ssh -vvv -nNT -L ~/podman.sock:/run/user/1000/podman/podman.sock
 ----
 
-With podman With Podman 4.x one can simply point to the Podman socket without the extra tunnel.  We will cover this in a
+With podman With Podman 4.x one can simply point to the Podman socket without the extra tunnel.  We plan to cover this in a
 future article along with more details and usage surrounding Podman 4.x.
 
 To create the Docker context, run a command like the following:
@@ -108,14 +109,14 @@ To create the Docker context, run a command like the following:
 ----
 docker context create podman \
     --default-stack-orchestrator swarm \
-    --description podman –docker \
+    --description podman --docker \
     host=unix:///Users/shadowman/podman.sock
 ----
 
 And then to use the newly created context:
 [source,bash]
 ----
-docker use podman
+docker context use podman
 ----
 
 From now on, all *docker* and *docker-compose* commands will utilize the Podman machine for the back end.
