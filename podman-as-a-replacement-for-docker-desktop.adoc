@@ -156,8 +156,32 @@ And then to use the newly created context:
 docker context use podman
 ----
 
-From now on, all *docker* and *docker-compose* commands will utilize the Podman machine for the back end.
+On MacOS, from now on, all *docker* and *docker-compose* commands will utilize the Podman machine for the back end.
 
+On Linux, all *docker* commands will utilize podman for the back end. However, *docker-compose* will continue to 
+default to docker, despite the context setting on docker.  You can specify the context directly with a `--context`
+flag for *docker-compse*.
+
+For example,
+
+[source,bash]
+----
+docker-compose ‐‐context podman up -d
+----
+
+Or alternatively,
+
+[source,bash]
+----
+DOCKER_HOST="unix:///run/user/1000/podman/podman.sock" docker-compose up -d
+----
+
+Note you could set DOCKER_HOST as an environment variable.
+
+[source,bash]
+----
+export DOCKER_HOST="unix:///run/user/1000/podman/podman.sock"
+----
 
 == Corporate Network Considerations
 
